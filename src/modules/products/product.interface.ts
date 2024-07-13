@@ -6,6 +6,6 @@ export type TProduct ={
     stockQuantity : number;
     description : string;
     category : string;
-    ratings : string;
+    ratings : number;
     images : string[]
 }

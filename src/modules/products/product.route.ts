@@ -30,6 +30,26 @@ router.get("/:id", async (req: Request, res: Response) => {
     data: singleProduct,
   });
 });
+router.put("/update-product/:id", async (req: Request, res: Response) => {
+  const id = req.params.id;
+  const product = req.body;
+  const options = { new: true, upsert: true };
+  const updatedDoc = {
+    $set: {
+      ...product,
+    },
+  };
+  const updatedProduct = await Product.findByIdAndUpdate(
+    id,
+    updatedDoc,
+    options
+  );
+  res.json({
+    success: true,
+    message: "Product updated successfully",
+    data: updatedProduct,
+  });
+});
 
 router.delete("/:id", async (req: Request, res: Response) => {
   const id = req.params.id;

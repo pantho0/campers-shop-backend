@@ -4,12 +4,51 @@ import { Product } from "./product.model";
 const router = express.Router();
 
 router.get("/", async (req: Request, res: Response) => {
-  const products = await Product.find();
-  res.json({
-    success: true,
-    message: "Products retrived successfully",
-    data: products,
-  });
+  try {
+    const { search, category, minPrice, maxPrice, sort } = req.query;
+
+    let filter: any = {};
+
+    if (search) {
+      filter.$or = [
+        { name: { $regex: search, $options: "i" } },
+        { description: { $regex: search, $options: "i" } },
+      ];
+    }
+
+    if (category) {
+      filter.category = category;
+    }
+
+    if (minPrice || maxPrice) {
+      filter.price = {};
+      if (minPrice) filter.price.$gte = Number(minPrice);
+      if (maxPrice) filter.price.$lte = Number(maxPrice);
+    }
+
+    let sortOption: any = {};
+    if (sort) {
+      if (sort === "asc") {
+        sortOption.price = 1; // Ascending
+      } else if (sort === "desc") {
+        sortOption.price = -1; // Descending
+      }
+    }
+
+    const products = await Product.find(filter).sort(sortOption);
+
+    res.json({
+      success: true,
+      message: "Products retrieved successfully",
+      data: products,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "An error occurred while retrieving products",
+      error: error.message,
+    });
+  }
 });
 
 router.post("/add-product", async (req: Request, res: Response) => {
